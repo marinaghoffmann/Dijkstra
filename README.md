@@ -1,121 +1,185 @@
-# 🚀 Análise Completa do Algoritmo de Dijkstra — Python e C
+ # 🧭 DIJKSTRA — ANÁLISE DE COMPLEXIDADE E BENCHMARK EM PYTHON E C
 
-Implementações e estudo experimental do algoritmo de **Dijkstra** (caminho mínimo em grafos com arestas de peso não-negativo).  
-Inclui: implementações em **Python e C**, scripts de benchmark, geração de CSVs, criação de gráficos e documentação.
-
----
-
-## 📌 Conteúdo do Repositório
-
-- `dijkstra.py` — implementação em Python com suporte a `--demo`, `--source` e leitura via stdin.  
-- `dijkstra.c` — implementação em C usando min-heap simples, também com `--demo` e leitura via stdin.  
-- `benchmark_dijkstra.py` — gera grafos aleatórios, executa benchmarks, salva resultados em CSV e cria gráficos comparativos (Python vs C).  
-- `results_dijkstra.csv` — (gerado pelo benchmark) resultados de performance.  
-- `plot_python_dijkstra.png`, `plot_python_vs_c_dijkstra.png` — imagens geradas pelo benchmark.  
-- `README.md` — este arquivo.
+Este repositório contém implementações completas do algoritmo de **Dijkstra** em **Python** e **C**, além de um estudo experimental detalhado sobre sua complexidade, desempenho prático, geração de gráficos e relatório de benchmarking.
 
 ---
 
-# 1. Descrição do Problema e do Algoritmo
+# 📌 1. SOBRE O PROJETO
 
-### 🎯 Problema
-Calcular as menores distâncias entre um vértice fonte `s` e todos os outros vértices de um grafo com pesos não-negativos.
+Este projeto foi desenvolvido para a disciplina de **Teoria da Computação**, com os objetivos de:
 
-### 💡 Ideia Geral do Dijkstra
-Utiliza uma *fila de prioridade* (min-heap) para sempre escolher o próximo vértice de menor distância conhecida e atualizar (relaxar) os vizinhos.
-
-### 📌 Pseudocódigo
-Dijkstra(G, source):
-para cada v em V:
-dist[v] = +∞
-parent[v] = NIL
-dist[source] = 0
-
-heap = min-priority-queue
-heap.push((0, source))
-
-enquanto heap não estiver vazia:
-(d, u) = heap.pop_min()
-se d > dist[u]: continue
- para cada (u, v, w) em adj[u]:
-    se dist[u] + w < dist[v]:
-       dist[v] = dist[u] + w
-       parent[v] = u
-       heap.push((dist[v], v))
-retorne dist, parent
-
+* Implementar o algoritmo **Dijkstra** em Python e C.
+* Comparar o desempenho entre as duas linguagens.
+* Gerar dados experimentais com entradas sintéticas.
+* Confirmar empiricamente a complexidade teórica.
+* Produzir gráficos, tabelas e relatórios.
+* Analisar melhor caso, pior caso e caso médio.
 
 ---
 
-# 2. Classificação Assintótica
+# ⚙️ 2. DESCRIÇÃO DO DIJKSTRA
 
-Assumindo um **heap binário**:
+O **algoritmo de Dijkstra** resolve o problema do **caminho mínimo** em grafos ponderados e sem arestas negativas.
 
-| Operação | Custo |
-|---------|-------|
-| Inserção / extração | \(O(\log n)\) |
-| Relaxamento total | \(O(m \log n)\) |
-| **Complexidade final** | **O((n + m) log n)** |
+**Lógica geral:**
 
-Para heap de Fibonacci → \(O(m + n \log n)\).
+1. Inicialize a distância do nó inicial como 0 e de todos os outros como infinito.
+2. Marque todos os nós como não visitados.
+3. Enquanto houver nós não visitados:
 
----
+   * Escolha o nó não visitado com a menor distância.
+   * Atualize as distâncias de seus vizinhos.
+   * Marque o nó como visitado.
 
-# 3. Quando Usar Dijkstra
+**Pseudocódigo resumido:**
 
-📌 **Use quando:**
-- Pesos são **não-negativos**.  
-- Você precisa de caminho mínimo *single-source*.  
-- Grafos médios e grandes (até milhões de arestas) com boa performance.
-
-❌ **Não use quando:**
-- Existem pesos negativos → **Bellman-Ford**.  
-- Quer caminho mínimo entre *todos os pares* → Floyd-Warshall.  
-- O problema envolve caminho mais longo → NP-hard.
-
----
-
-# 4. Formato de Entrada (stdin)
-
-n m
-u1 v1 w1
-u2 v2 w2
-...
-u_m v_m w_m
-s
-
-- `n` → vértices (0 até n-1)  
-- `m` → número de arestas  
-- `u v w` → aresta com peso  
-- `s` → fonte (pode ser sobrescrita por `--source`)
-
-### Exemplo (`graph.txt`)
-5 6
-0 1 2
-0 2 4
-1 2 1
-1 3 7
-2 4 3
-3 4 1
-0
-
+```
+dijkstra(grafo, origem):
+    dist[origem] = 0
+    conjunto_vazio = {}
+    enquanto houver nós não visitados:
+        u = nó com menor dist[u]
+        para cada vizinho v de u:
+            se dist[u] + peso(u,v) < dist[v]:
+                dist[v] = dist[u] + peso(u,v)
+        marcar u como visitado
+```
 
 ---
 
-# 5. Como Executar o Projeto
+# 📈 3. COMPLEXIDADE ASSINTÓTICA
 
-## ✔ Python
+| CASO            | COMPLEXIDADE | DETALHES |   |   |     |   |   |                                     |
+| --------------- | ------------ | -------- | - | - | --- | - | - | ----------------------------------- |
+| **Melhor Caso** | O(           | E        | + | V | log | V | ) | Grafo com poucas atualizações       |
+| **Caso Médio**  | Θ(           | E        | + | V | log | V | ) | Grafos aleatórios densos            |
+| **Pior Caso**   | O(           | E        | + | V | log | V | ) | Grafos densos com todos os caminhos |
+
+### SÍNTESE:
+
+* **Big-O:** O(|E| + |V| log |V|)
+* **Big-Ω:** Ω(|E| + |V| log |V|)
+* **Big-Θ:** Θ(|E| + |V| log |V|)
+
+O desempenho depende da estrutura usada para a fila de prioridade (ex: heap binário).
+
+---
+
+# 🏗️ 4. COMO REPRODUZIR O PROJETO
+
+## 0️⃣ Clonar o repositório:
+
+```
+git clone https://github.com/marinaghoffmann/Dijkstra
+cd Dijkstra
+```
+
+## 1️⃣ Criar e ativar ambiente virtual (Windows PowerShell):
+
+```
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+## 2️⃣ Instalar pacotes necessários:
+
+```
+pip install matplotlib numpy
+```
+
+## 3️⃣ Compilar implementação em C:
+
+```
+gcc -O2 -o dijkstra_c.exe dijkstra.c
+```
+
+## 4️⃣ Rodar benchmarking:
+
+* Python + C:
+
+```
+python benchmark_dijkstra.py --include-c
+```
+
+* Somente Python:
+
+```
+python benchmark_dijkstra.py
+```
+
+* Alterar número de repetições (ex: 30):
+
+```
+python benchmark_dijkstra.py --reps 30 --include-c
+```
+
+---
+
+# 🧮 5. IMPLEMENTAÇÕES
+
+## ✔️ Python — `dijkstra.py`
+
+### Executar demo:
+
 ```bash
 python dijkstra.py --demo
-python dijkstra.py < graph.txt
-python dijkstra.py --source 0 < graph.txt
+```
 
-C
-gcc -O2 -o dijkstra_c dijkstra.c
-./dijkstra_c --demo
-./dijkstra_c < graph.txt
+### Executar com arquivo de entrada:
 
-Benchmark
+```bash
+python dijkstra.py --input grafo.txt
+```
+
+## ⚡ C — `dijkstra.c`
+
+Implementação otimizada para desempenho máximo.
+
+### Compilar:
+
+```bash
+gcc -O2 -o dijkstra_c.exe dijkstra.c
+```
+
+### Executar demo:
+
+```bash
+./dijkstra_c.exe --demo
+```
+
+---
+
+# 🚀 6. BENCHMARKING — `benchmark_dijkstra.py`
+
+O script gera:
+
+* Entradas aleatórias de diferentes tamanhos.
+* 15 a 30 execuções por tamanho.
+* Média e desvio-padrão dos tempos.
+* CSV com resultados.
+* Gráficos PNG comparativos.
+
+### Executar benchmarking:
+
+```bash
 python benchmark_dijkstra.py
+```
+
+### Incluir implementação em C:
+
+```bash
 python benchmark_dijkstra.py --include-c
-(Certifique-se de usar um virtualenv com matplotlib instalado.)
+```
+
+---
+
+# 📊 7. GRÁFICOS E RESULTADOS
+
+Arquivos gerados automaticamente:
+
+* `plot_c_mean_std.png` → Tempo médio + desvio do C
+* `plot_c_vs_theory.png` → Comparação com curva teórica
+* `plot_python_mean_std.png` → Tempo médio + desvio do Python
+* `plot_python_vs_c_mean_std.png` → Comparação Python x C
+* `plot_python_vs_theory.png` → Comparação Python com complexidade teórica
+* `results_dijkstra.csv` → Todos os resultados tabulados
